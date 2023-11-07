@@ -1,4 +1,4 @@
-name: Pull Request Review
+name: Pull Request Tests
 
 on:
   pull_request:
@@ -7,24 +7,33 @@ on:
       - synchronize
 
 jobs:
-  review:
+  test:
     runs-on: ubuntu-latest
+
     steps:
-      - name: Check Code Quality
+      - name: Check Out Code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
           node-version: '14'
-      - run: npm install
-      - run: npm run lint
-      - name: Create Review Comment
-        uses: actions/github-script@v5
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Review PR
+        id: review
+        uses: softprops/action-gh-release@v1
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            github.pulls.createReview({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.payload.pull_request.number,
-              body: 'Code quality checks passed!',
-              event: 'APPROVE'
-            });
+          files: '**/*'
+          target: test-results
+
+      - name: Create Review Comment
+        if: always()
+        run: |
+          echo "Test results are available as artifacts. Please check them."
+          echo "::set-output name=review_body::Test results are available as artifacts. Please check them."
