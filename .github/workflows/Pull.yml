@@ -1,0 +1,38 @@
+name: Pull Request Tests
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check Out Code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Tests
+        run: npm test
+
+      - name: Review PR
+        id: review
+        uses: softprops/action-gh-release@v1
+        with:
+          files: '**/*'
+          terget: test-results
+
+      - name: Create Review Comment
+        if: always()
+        run: |
+          echo "Test results are available as artifacts. Please Check them."
+          echo ":: set-output name=review_boby::Test results are available as artifacts. Please check them."
