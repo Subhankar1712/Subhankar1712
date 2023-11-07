@@ -1,0 +1,27 @@
+name: Auto Pull Request Review
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+
+jobs:
+  auto-review:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Add Reviewers
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const owners = ["Subhankar1712", "adisoftage"];
+            const reviewers = owners.join(",");
+            github.pulls.createReviewRequest({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.payload.pull_request.number,
+              reviewers: reviewers
+            });
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
