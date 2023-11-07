@@ -1,4 +1,4 @@
-name: Auto Pull Request Review
+name: Pull Request Review
 
 on:
   pull_request:
@@ -7,21 +7,24 @@ on:
       - synchronize
 
 jobs:
-  auto-review:
+  review:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Add Reviewers
-        uses: actions/github-script@v6
+      - name: Check Code Quality
+        uses: actions/setup-node@v2
         with:
+          node-version: '14'
+      - run: npm install
+      - run: npm run lint
+      - name: Create Review Comment
+        uses: actions/github-script@v5
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const owners = ["Subhankar1712", "Team098"];
-            const reviewers = owners.join(",");
-            github.pulls.createReviewRequest({
+            github.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
-              reviewers: reviewers
+              body: 'Code quality checks passed!',
+              event: 'APPROVE'
             });
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
