@@ -15,7 +15,7 @@ jobs:
         uses: actions/github-script@v6
         with:
           script: |
-            const owners = ["Subhankar1712"];
+            const owners = ["Subhankar1712", "Team098"];
             const reviewers = owners.join(",");
             github.pulls.createReviewRequest({
               owner: context.repo.owner,
